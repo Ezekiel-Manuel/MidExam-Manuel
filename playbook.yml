@@ -1,0 +1,271 @@
+---
+#Playbook for installing, configuring, and managing enterprise monitoring via ansible
+- name: Install and Configure Elasticsearch in Ubuntu
+  hosts: elasticsearch
+  tags: elasticsearch,ubuntu
+  tasks:
+    - name: Include variables
+      include_vars:
+        file: config.yml
+
+    - name: Install Elasticsearch dependency in Ubuntu
+      include_role:
+        name: ubuntupkg
+      vars:
+        package: openjdk-8-jdk
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install Nginx in Ubuntu
+      include_role:
+        name: ubuntupkg
+      vars:
+        package: nginx
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Stopping Apache2
+      service:
+        name: apache2
+        state: stopped
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install apt-transport-https
+      include_role:
+        name: ubuntupkg
+      vars:
+        package: apt-transport-https
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Configure Elasticsearch (Ubuntu)
+      include_role:
+        name: ubuntuelsconfig
+      when: ansible_distribution == 'Ubuntu'
+      
+     
+- name: Install and Configure Elasticsearch in CentOS
+  hosts: elasticsearch
+  tags: elasticsearch,centos
+  tasks:
+    - name: Include variables
+      include_vars:
+        file: config.yml 
+    - name: Install Java in CentOS
+      include_role:
+        name: centospkg
+      vars:
+        package: java-1.8.0-openjdk
+      when: ansible_distribution == 'CentOS'
+    - name: Configuring Elastic Search in CentOS
+      include_role:
+        name: centoselsconfig
+      when: ansible_distribution == 'CentOS'
+      
+
+- name: Install and Configure Logstash in Ubuntu
+  hosts: logstash
+  tags: logstash,ubuntu
+  tasks:
+    - name: Include variables
+      include_vars:
+        file: config.yml
+    - name: Install Logstash in Ubuntu
+      include_role:
+        name: ubuntupkg
+      vars:
+        package: logstash
+      when: ansible_distribution == 'Ubuntu'
+    - name: Configure Logstash in Ubuntu
+      include_role:
+        name: ubuntulogstashconfig
+      when: ansible_distribution == 'Ubuntu'
+      
+
+- name: Install and Configure Logstash in CentOS
+  hosts: logstash
+  tags: logstash,centos
+  tasks:
+    - name: Include variables
+      include_vars:
+        file: config.yml
+    - name: Install logstash in CentOS
+      include_role:
+        name: centospkg
+      vars:
+        package: logstash
+      when: ansible_distribution == 'CentOS'
+    - name: Configure logstash in CentOS
+      include_role:
+        name: centoslogstashconfig
+      when: ansible_distribution == 'CentOS'
+
+
+- name: Install and Configure Kibana in Ubuntu
+  hosts: kibana
+  tags: kibana,ubuntu
+  tasks:
+    - name: Include vars
+      include_vars:
+        file: config.yml
+    - name: Install Kibana in Ubuntu
+      include_role:
+        name: ubuntupkg
+      vars:
+        package: kibana
+      when: ansible_distribution == 'Ubuntu'
+    - name: Configure Kibana in Ubuntu
+      include_role:
+        name: ubuntukibanaconfig
+      when: ansible_distribution == 'Ubuntu'
+      
+
+- name: Install and Configure Kibana in CentOS
+  hosts: kibana
+  tags: kibana,centos
+  tasks:
+    - name: Include vars
+      include_vars:
+        file: config.yml
+    - name: Install Kibana in CentOS
+      include_role:
+        name: centospkg
+      vars:
+        package: kibana
+      when: ansible_distribution == 'CentOS'
+    - name: Configure Kibana (CentOS)
+      include_role:
+        name: centoskibanaconfig
+      when: ansible_distribution == 'CentOS'
+
+
+- name: Install and Configure Nagios in Ubuntu Host
+  hosts: nagios
+  tags: nagios,ubuntu
+  tasks:
+    - name: Include global variable
+      include_vars:
+        file: config.yml
+    
+    - name: Stop Nginx
+      service:
+        name: nginx
+        state: stopped
+        enabled: no
+
+- name: Install and Configure Nagios in Ubuntu Host
+  hosts: nagios
+  tags: nagios,ubuntu
+  tasks:
+    - name: Include global variable
+      include_vars:
+        file: config.yml
+    
+    - name: Stop Nginx
+      service:
+        name: nginx
+        state: stopped
+        enabled: no
+
+    - name: Install Nagios dependencies in Ubuntu
+      include_role:
+        name: ubuntupkg
+      vars:
+        package:
+          - autoconf
+          - gcc
+          - libc6
+          - make
+          - wget
+          - libssl-dev
+          - gawk
+          - dc
+          - build-essential
+          - snmp
+          - libnet-snmp-perl
+          - gettext
+          - unzip
+          - apache2
+          - php
+          - libapache2-mod-php7.4
+          - libgd-dev
+          - python3
+          - python3-pip
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install nagios and configure in Ubuntu
+      include_role:
+        name: ubuntunagiosconf
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Stopping UFW
+      include_role:
+        name: stopufw
+      when: ansible_distribution == 'Ubuntu'
+
+
+
+
+
+
+
+- name: Install and configure Prometheus in CentOS
+  hosts: prometheus
+  tags: prometheus,centos
+  tasks:
+    - name: Include vars
+      include_vars:
+        file: config.yml
+        
+    - name: Stopping httpd
+      service:
+        name: httpd
+        state: stopped
+      when: ansible_distribution == 'CentOS'
+        
+    - name: Install and configure Prometheus in CentOS
+      include_role:
+        name: centospromconf
+      when: ansible_distribution == 'CentOS'
+
+- name: Install and configure Prometheus in Ubuntu
+  hosts: prometheus
+  tags: prometheus,ubuntu
+  tasks:
+    - name: Include vars
+      include_vars:
+        file: config.yml
+        
+    - name: Disabling Apache2
+      service:
+        name: apache2
+        state: stopped
+        
+    - name: Install and configure Prometheus in Ubuntu
+      include_role:
+        name: ubuntupromconf
+      when: ansible_distribution == 'Ubuntu'
+
+
+- name: Install and Configure LAMP Stack in Ubuntu
+  hosts: lamp
+  tags: lamp,ubuntu
+  tasks:
+    - name: Include vars
+      include_vars:
+        file: config.yml
+
+    - name: Install LAMP Packages
+      include_role:
+        name: ubuntupkg
+      vars:
+        package:
+          - apache2
+          - mysql-server
+          - python3-pymysql
+          - php
+          - php-mysql
+          - libapache2-mod-php
+      when: ansible_distribution == 'Ubuntu'
+      
+    - name: Configure LAMP Packages in Ubuntu
+      include_role:
+        name: ubuntulampconf
+      when: ansible_distribution == 'Ubuntu' 

@@ -1,0 +1,8 @@
+---
+# tasks file for ubuntuelsconfig
+- name: "Installing package {{ package }} in Ubuntu"
+  apt:
+    name: "{{ package }}"
+    state: present
+    update_cache: yes
+
